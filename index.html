@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema en Mantenimiento - Odoo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d0d23;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .maintenance-container {
+            text-align: center;
+            max-width: 600px;
+            padding: 3rem 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            margin-bottom: 2rem;
+        }
+
+        .logo img {
+            width: 120px;
+            height: auto;
+        }
+
+        .maintenance-title {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+
+        .maintenance-subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .maintenance-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .maintenance-date {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #0d6efd;
+        }
+
+        .maintenance-time {
+            font-size: 1.1rem;
+            color: #495057;
+            margin-bottom: 1.5rem;
+        }
+
+        .maintenance-message {
+            font-size: 1rem;
+            color: #e0e0e0;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .progress-container {
+            margin: 1.5rem 0;
+        }
+
+        .progress-label {
+            font-size: 0.875rem;
+            color: #e0e0e0;
+            margin-bottom: 0.5rem;
+            text-align: left;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #0d6efd;
+            border-radius: 3px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .progress-text {
+            font-size: 0.875rem;
+            color: #0d6efd;
+            font-weight: 500;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        .status-badge {
+            display: inline-block;
+            background: rgba(255, 243, 205, 0.9);
+            color: #856404;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid rgba(255, 234, 167, 0.8);
+            margin: 1rem 0;
+        }
+
+        .contact-info {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .contact-info p {
+            font-size: 0.875rem;
+            color: #e0e0e0;
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-link {
+            color: #0d6efd;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .contact-link:hover {
+            text-decoration: underline;
+        }
+
+        .fun-element {
+            font-size: 0.875rem;
+            color: #e0e0e0;
+            font-style: italic;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Juego del Pingüino */
+        .penguin-game {
+            position: fixed;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            user-select: none;
+        }
+
+        .penguin-game:hover {
+            transform: scale(1.1);
+        }
+
+        /* Partículas */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            background: #0d6efd;
+            border-radius: 50%;
+            z-index: 999;
+            animation: particle-fade 2s ease-out forwards;
+        }
+
+        @keyframes particle-fade {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0); }
+        }
+
+        /* Contador de clicks */
+        .click-counter {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(13, 110, 253, 0.9);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            z-index: 1001;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Mensaje flotante */
+        .floating-message {
+            position: fixed;
+            background: rgba(255, 255, 255, 0.95);
+            color: #0d0d23;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            z-index: 1002;
+            pointer-events: none;
+            animation: message-float 2s ease-out forwards;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        @keyframes message-float {
+            0% { opacity: 0; transform: translateY(20px); }
+            20% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+
+        /* Modo arcoíris */
+        .rainbow-mode {
+            animation: rainbow-bg 3s linear infinite;
+        }
+
+        @keyframes rainbow-bg {
+            0% { background: #ff0000; }
+            16.66% { background: #ff8000; }
+            33.33% { background: #ffff00; }
+            50% { background: #00ff00; }
+            66.66% { background: #0080ff; }
+            83.33% { background: #8000ff; }
+            100% { background: #ff0000; }
+        }
+
+        /* Cohete espacial */
+        .rocket {
+            position: fixed;
+            font-size: 2rem;
+            z-index: 1003;
+            pointer-events: none;
+            animation: rocket-fly 8s linear infinite;
+        }
+
+        @keyframes rocket-fly {
+            0% { left: -100px; top: 50%; transform: rotate(0deg); }
+            50% { left: 50%; top: 20%; transform: rotate(15deg); }
+            100% { left: calc(100vw + 100px); top: 80%; transform: rotate(-15deg); }
+        }
+
+        /* Confeti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            z-index: 1004;
+            pointer-events: none;
+            animation: confetti-fall 3s linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Lupa detective */
+        .magnifier {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            border: 3px solid #0d6efd;
+            border-radius: 50%;
+            background: rgba(13, 110, 253, 0.1);
+            pointer-events: none;
+            z-index: 1005;
+            backdrop-filter: blur(2px);
+        }
+
+        /* Juego de memoria */
+        .memory-game {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 2rem;
+            border-radius: 12px;
+            z-index: 1006;
+            display: none;
+        }
+
+        /* Tetris Visual */
+        .tetris-game {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 2rem;
+            border-radius: 12px;
+            z-index: 1007;
+            display: none;
+            text-align: center;
+            color: white;
+        }
+
+        .tetris-board {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 1px;
+            background: #333;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .tetris-cell {
+            width: 25px;
+            height: 25px;
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 2px;
+        }
+
+        .tetris-cell.filled {
+            border: 1px solid #666;
+        }
+
+        .tetris-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .tetris-controls {
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: #ccc;
+        }
+
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .memory-card {
+            width: 60px;
+            height: 60px;
+            background: #0d6efd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .memory-card.flipped {
+            background: #28a745;
+            transform: rotateY(180deg);
+        }
+
+        /* Botón de sonido */
+        .sound-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(13, 110, 253, 0.9);
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            z-index: 1001;
+            backdrop-filter: blur(10px);
+        }
+
+        .sound-toggle.muted {
+            background: rgba(108, 117, 125, 0.9);
+        }
+
+        @media (max-width: 768px) {
+            .maintenance-container {
+                margin: 1rem;
+                padding: 2rem 1.5rem;
+            }
+            
+            .maintenance-title {
+                font-size: 1.75rem;
+            }
+            
+            .maintenance-subtitle {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="sound-toggle" id="soundToggle" title="Silenciar/Activar sonidos">🔊</button>
+    
+    <div class="click-counter" id="clickCounter">
+        🎯 Clicks: 0
+    </div>
+    
+    <div class="maintenance-container">
+        <div class="logo">
+            <img src="https://cdn.prod.website-files.com/6517e50bcde9c5589d4ccbca/651a7520a44b12668a5fa4f0_penguin-logo.svg" alt="Penguin Logo">
+        </div>
+        
+        <h1 class="maintenance-title">Sistema en Mantenimiento</h1>
+        
+        <p class="maintenance-subtitle">
+            Estamos trabajando para mejorar tu experiencia. 
+            Nuestro equipo técnico está realizando mejoras importantes en el sistema.
+        </p>
+
+        <div class="status-badge">
+            🔧 Mantenimiento Programado
+        </div>
+
+        <div class="maintenance-info">
+            <div class="progress-container">
+                <div class="progress-label">Progreso del mantenimiento</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">Calculando...</div>
+            </div>
+            
+            <p class="maintenance-message">
+                Durante este tiempo, el sistema estará temporalmente fuera de servicio.
+            </p>
+            
+                    <p class="fun-element">
+            💡 Mientras tanto, ¿por qué no aprovechas para tomar un café? ☕
+            <br><small style="opacity: 0.7;">💻 Tip: Abre la consola del navegador para un juego secreto</small>
+            <br><small style="opacity: 0.7;">🎮 Tip: Presiona 'M' para juego de memoria, 'T' para Tetris visual, 'R' para cohete, 'C' para confeti</small>
+        </p>
+        </div>
+
+        <div class="contact-info">
+            <p>Para consultas urgentes, contacta al equipo de <a href="mailto:dev@penguin.digital" class="contact-link">I&D Team</a></p>
+        </div>
+    </div>
+
+    <!-- Juego de memoria -->
+    <div class="memory-game" id="memoryGame">
+        <h3 style="color: white; margin-bottom: 1rem;">🎮 Juego de Memoria</h3>
+        <div class="memory-grid" id="memoryGrid"></div>
+        <button onclick="closeMemoryGame()" style="background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">Cerrar</button>
+    </div>
+
+    <!-- Tetris Visual -->
+    <div class="tetris-game" id="tetrisGame">
+        <h3 style="color: white; margin-bottom: 1rem;">🎮 TETRIS 🎮</h3>
+        
+        <div class="tetris-info">
+            <div>Nivel: <span id="tetrisLevel">1</span></div>
+            <div>Líneas: <span id="tetrisLines">0</span></div>
+            <div>Puntuación: <span id="tetrisScore">0</span></div>
+        </div>
+        
+        <div class="tetris-board" id="tetrisBoard"></div>
+        
+        <div class="tetris-controls">
+            <div>A/D: Mover | S: Bajar | W: Rotar | Espacio: Caída rápida</div>
+            <div>P: Pausar | R: Reiniciar | Q: Salir</div>
+        </div>
+        
+        <button onclick="closeTetrisGame()" style="background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; margin-top: 1rem;">Cerrar</button>
+    </div>
+
+    <script>
+        const startDate = new Date('2025-08-30T12:00:00Z');
+        const endDate = new Date('2025-08-31T18:00:00Z');
+        
+        // Variables del juego
+        let clickCount = 0;
+        let penguinScore = 0;
+        let isPenguinVisible = false;
+        let currentPenguin = null;
+        let isSoundEnabled = true;
+        let isRainbowMode = false;
+        let magnifierVisible = false;
+        
+        // Mensajes motivacionales
+        const messages = [
+            "¡Sigue así! 🚀", "¡Excelente! ⭐", "¡Increíble! 🎉", 
+            "¡Eres un crack! 💪", "¡Mantén el ritmo! 🔥", "¡Genial! 🎯",
+            "¡Fantástico! 🌟", "¡Sobresaliente! 🏆", "¡Maravilloso! ✨",
+            "¡Espectacular! 🎊", "¡Brillante! 💎", "¡Extraordinario! 🌈"
+        ];
+        
+        // Emojis para el juego de memoria
+        const memoryEmojis = ['🐧', '🚀', '⭐', '🎯', '💎', '🌈', '🎮', '🎉'];
+        
+        function updateProgress() {
+            const now = new Date();
+            const totalDuration = endDate - startDate;
+            const elapsed = now - startDate;
+            
+            let progress = 0;
+            let statusText = '';
+            
+            if (now < startDate) {
+                progress = 0;
+                statusText = 'Mantenimiento programado para comenzar';
+            } else if (now >= endDate) {
+                progress = 100;
+                statusText = 'Mantenimiento completado';
+            } else {
+                progress = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
+                statusText = `Mantenimiento en progreso: ${Math.round(progress)}%`;
+            }
+            
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            
+            if (progressFill && progressText) {
+                progressFill.style.width = progress + '%';
+                progressText.textContent = statusText;
+            }
+            
+            const statusBadge = document.querySelector('.status-badge');
+            if (statusBadge) {
+                if (progress === 0) {
+                    statusBadge.textContent = '⏰ Mantenimiento Programado';
+                    statusBadge.style.background = 'rgba(255, 243, 205, 0.9)';
+                    statusBadge.style.color = '#856404';
+                    statusBadge.style.borderColor = 'rgba(255, 234, 167, 0.8)';
+                } else if (progress === 100) {
+                    statusBadge.textContent = '✅ Mantenimiento Completado';
+                    statusBadge.style.background = 'rgba(209, 231, 221, 0.9)';
+                    statusBadge.style.color = '#0f5132';
+                    statusBadge.style.borderColor = 'rgba(186, 219, 204, 0.8)';
+                } else {
+                    statusBadge.style.background = 'rgba(204, 229, 255, 0.9)';
+                    statusBadge.style.color = '#004085';
+                    statusBadge.style.borderColor = 'rgba(184, 218, 255, 0.8)';
+                }
+            }
+        }
+        
+        // Función para crear partículas
+        function createParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            particle.style.width = Math.random() * 8 + 4 + 'px';
+            particle.style.height = particle.style.width;
+            
+            document.body.appendChild(particle);
+            
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            }, 2000);
+        }
+        
+        // Función para reproducir sonidos
+        function playSound(type) {
+            if (!isSoundEnabled) return;
+            
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            switch(type) {
+                case 'click':
+                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                    break;
+                case 'penguin':
+                    oscillator.frequency.setValueAtTime(1200, audioContext.currentTime);
+                    break;
+                case 'success':
+                    oscillator.frequency.setValueAtTime(1000, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(1200, audioContext.currentTime + 0.1);
+                    break;
+            }
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+        
+        // Función para crear confeti
+        function createConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * window.innerWidth + 'px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 2 + 's';
+                
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => {
+                    if (confetti.parentNode) {
+                        confetti.parentNode.removeChild(confetti);
+                    }
+                }, 5000);
+            }
+        }
+        
+        // Función para lanzar cohete
+        function launchRocket() {
+            const rocket = document.createElement('div');
+            rocket.className = 'rocket';
+            rocket.innerHTML = '🚀';
+            rocket.style.top = Math.random() * (window.innerHeight - 100) + 'px';
+            
+            document.body.appendChild(rocket);
+            
+            setTimeout(() => {
+                if (rocket.parentNode) {
+                    rocket.parentNode.removeChild(rocket);
+                }
+            }, 8000);
+        }
+        
+        // Función para modo arcoíris
+        function toggleRainbowMode() {
+            isRainbowMode = !isRainbowMode;
+            const body = document.body;
+            
+            if (isRainbowMode) {
+                body.classList.add('rainbow-mode');
+                showMessage('🌈 ¡Modo arcoíris activado!', window.innerWidth / 2, 100);
+            } else {
+                body.classList.remove('rainbow-mode');
+                body.style.background = '#0d0d23';
+                showMessage('🌙 Modo arcoíris desactivado', window.innerWidth / 2, 100);
+            }
+        }
+        
+        // Función para lupa detective
+        function toggleMagnifier() {
+            magnifierVisible = !magnifierVisible;
+            
+            if (magnifierVisible) {
+                const magnifier = document.createElement('div');
+                magnifier.className = 'magnifier';
+                magnifier.id = 'magnifier';
+                document.body.appendChild(magnifier);
+                
+                document.addEventListener('mousemove', updateMagnifier);
+                showMessage('🔍 Modo detective activado', window.innerWidth / 2, 100);
+            } else {
+                const magnifier = document.getElementById('magnifier');
+                if (magnifier) {
+                    magnifier.remove();
+                }
+                document.removeEventListener('mousemove', updateMagnifier);
+                showMessage('👁️ Modo detective desactivado', window.innerWidth / 2, 100);
+            }
+        }
+        
+        function updateMagnifier(e) {
+            const magnifier = document.getElementById('magnifier');
+            if (magnifier) {
+                magnifier.style.left = (e.clientX - 30) + 'px';
+                magnifier.style.top = (e.clientY - 30) + 'px';
+            }
+        }
+        
+        // Función para mostrar mensaje flotante
+        function showMessage(message, x, y) {
+            const msg = document.createElement('div');
+            msg.className = 'floating-message';
+            msg.textContent = message;
+            msg.style.left = (x - 100) + 'px';
+            msg.style.top = (y - 50) + 'px';
+            
+            document.body.appendChild(msg);
+            
+            setTimeout(() => {
+                if (msg.parentNode) {
+                    msg.parentNode.removeChild(msg);
+                }
+            }, 2000);
+        }
+        
+        // Función para crear pingüino
+        function createPenguin() {
+            if (isPenguinVisible) return;
+            
+            const penguin = document.createElement('div');
+            penguin.className = 'penguin-game';
+            penguin.innerHTML = '🐧';
+            penguin.style.fontSize = '2rem';
+            penguin.style.left = Math.random() * (window.innerWidth - 100) + 'px';
+            penguin.style.top = Math.random() * (window.innerHeight - 100) + 'px';
+            
+            penguin.addEventListener('click', () => {
+                penguinScore++;
+                playSound('penguin');
+                showMessage(`¡Pingüino encontrado! +1 (Total: ${penguinScore})`, 
+                           event.clientX, event.clientY);
+                document.body.removeChild(penguin);
+                isPenguinVisible = false;
+                currentPenguin = null;
+                
+                // Crear nuevo pingüino después de un delay
+                setTimeout(createPenguin, Math.random() * 3000 + 2000);
+            });
+            
+            document.body.appendChild(penguin);
+            currentPenguin = penguin;
+            isPenguinVisible = true;
+            
+            // El pingüino desaparece después de 5 segundos
+            setTimeout(() => {
+                if (penguin.parentNode) {
+                    document.body.removeChild(penguin);
+                    isPenguinVisible = false;
+                    currentPenguin = null;
+                    createPenguin();
+                }
+            }, 5000);
+        }
+        
+        // Funciones del juego de memoria
+        function openMemoryGame() {
+            const game = document.getElementById('memoryGame');
+            const grid = document.getElementById('memoryGrid');
+            
+            // Crear cartas
+            const cards = [...memoryEmojis, ...memoryEmojis];
+            const shuffledCards = cards.sort(() => Math.random() - 0.5);
+            
+            grid.innerHTML = '';
+            shuffledCards.forEach((emoji, index) => {
+                const card = document.createElement('div');
+                card.className = 'memory-card';
+                card.dataset.emoji = emoji;
+                card.dataset.index = index;
+                card.addEventListener('click', flipCard);
+                grid.appendChild(card);
+            });
+            
+            game.style.display = 'block';
+        }
+        
+        function closeMemoryGame() {
+            document.getElementById('memoryGame').style.display = 'none';
+        }
+        
+        // Funciones del Tetris Visual
+        function openTetrisGame() {
+            const game = document.getElementById('tetrisGame');
+            const board = document.getElementById('tetrisBoard');
+            
+            // Crear tablero visual
+            board.innerHTML = '';
+            for (let y = 0; y < 20; y++) {
+                for (let x = 0; x < 10; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'tetris-cell';
+                    cell.id = `cell-${y}-${x}`;
+                    board.appendChild(cell);
+                }
+            }
+            
+            game.style.display = 'block';
+            
+            // Iniciar Tetris visual
+            initVisualTetris();
+        }
+        
+        function closeTetrisGame() {
+            document.getElementById('tetrisGame').style.display = 'none';
+            if (tetrisInterval) {
+                clearInterval(tetrisInterval);
+                tetrisInterval = null;
+            }
+        }
+        
+        function initVisualTetris() {
+            // Reiniciar variables
+            tetrisBoard = Array(20).fill().map(() => Array(10).fill(0));
+            tetrisScore = 0;
+            tetrisLevel = 1;
+            tetrisLines = 0;
+            tetrisGameRunning = true;
+            tetrisPaused = false;
+            
+            // Actualizar UI
+            updateTetrisUI();
+            
+            // Crear primera pieza
+            spawnPiece();
+            
+            // Iniciar loop del juego
+            tetrisInterval = setInterval(tetrisGameLoop, 1000 - (tetrisLevel * 50));
+            
+            // Event listeners para controles
+            document.addEventListener('keydown', handleTetrisInput);
+            
+            // Renderizar tablero inicial
+            renderVisualTetrisBoard();
+        }
+        
+        function updateTetrisUI() {
+            document.getElementById('tetrisLevel').textContent = tetrisLevel;
+            document.getElementById('tetrisLines').textContent = tetrisLines;
+            document.getElementById('tetrisScore').textContent = tetrisScore;
+        }
+        
+        function renderVisualTetrisBoard() {
+            // Limpiar tablero
+            for (let y = 0; y < 20; y++) {
+                for (let x = 0; x < 10; x++) {
+                    const cell = document.getElementById(`cell-${y}-${x}`);
+                    if (cell) {
+                        cell.className = 'tetris-cell';
+                        cell.style.backgroundColor = '#222';
+                    }
+                }
+            }
+            
+            // Renderizar piezas colocadas
+            for (let y = 0; y < 20; y++) {
+                for (let x = 0; x < 10; x++) {
+                    if (tetrisBoard[y][x]) {
+                        const cell = document.getElementById(`cell-${y}-${x}`);
+                        if (cell) {
+                            cell.className = 'tetris-cell filled';
+                            cell.style.backgroundColor = pieceColors[tetrisBoard[y][x]];
+                        }
+                    }
+                }
+            }
+            
+            // Renderizar pieza actual
+            if (tetrisPiece) {
+                const shape = getRotatedShape(tetrisPiece.type, tetrisPiece.rotation);
+                for (let y = 0; y < shape.length; y++) {
+                    for (let x = 0; x < shape[y].length; x++) {
+                        if (shape[y][x]) {
+                            const boardX = tetrisPiece.x + x;
+                            const boardY = tetrisPiece.y + y;
+                            if (boardY >= 0 && boardY < 20 && boardX >= 0 && boardX < 10) {
+                                const cell = document.getElementById(`cell-${boardY}-${boardX}`);
+                                if (cell) {
+                                    cell.className = 'tetris-cell filled';
+                                    cell.style.backgroundColor = pieceColors[tetrisPiece.type];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        let flippedCards = [];
+        let matchedPairs = 0;
+        
+        function flipCard() {
+            if (flippedCards.length === 2 || this.classList.contains('flipped')) return;
+            
+            this.classList.add('flipped');
+            this.textContent = this.dataset.emoji;
+            flippedCards.push(this);
+            
+            if (flippedCards.length === 2) {
+                setTimeout(checkMatch, 500);
+            }
+        }
+        
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            
+            if (card1.dataset.emoji === card2.dataset.emoji) {
+                matchedPairs++;
+                playSound('success');
+                showMessage('🎉 ¡Par encontrado!', window.innerWidth / 2, 100);
+                
+                if (matchedPairs === memoryEmojis.length) {
+                    setTimeout(() => {
+                        showMessage('🏆 ¡Juego completado!', window.innerWidth / 2, 100);
+                        createConfetti();
+                        closeMemoryGame();
+                        matchedPairs = 0;
+                    }, 1000);
+                }
+            } else {
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    card1.textContent = '';
+                    card2.textContent = '';
+                }, 1000);
+            }
+            
+            flippedCards = [];
+        }
+        
+        // Event listeners
+        document.addEventListener('click', (e) => {
+            clickCount++;
+            playSound('click');
+            document.getElementById('clickCounter').textContent = `🎯 Clicks: ${clickCount}`;
+            
+            // Crear partículas en el punto del click
+            createParticle(e.clientX, e.clientY);
+            
+            // Mostrar mensaje motivacional cada 5 clicks
+            if (clickCount % 5 === 0) {
+                const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+                showMessage(randomMessage, e.clientX, e.clientY);
+            }
+            
+            // Efectos especiales cada 10 clicks
+            if (clickCount % 10 === 0) {
+                createConfetti();
+            }
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            // Crear partículas ocasionales al mover el mouse
+            if (Math.random() < 0.1) {
+                createParticle(e.clientX, e.clientY);
+            }
+        });
+        
+        // Teclas de acceso rápido
+        document.addEventListener('keydown', (e) => {
+            switch(e.key.toLowerCase()) {
+                case 'm':
+                    openMemoryGame();
+                    break;
+                case 't':
+                    openTetrisGame();
+                    break;
+                case 'r':
+                    launchRocket();
+                    break;
+                case 'c':
+                    createConfetti();
+                    break;
+                case 'a':
+                    toggleRainbowMode();
+                    break;
+                case 'd':
+                    toggleMagnifier();
+                    break;
+                case 's':
+                    toggleSound();
+                    break;
+            }
+        });
+        
+        // Botón de sonido
+        document.getElementById('soundToggle').addEventListener('click', toggleSound);
+        
+        function toggleSound() {
+            isSoundEnabled = !isSoundEnabled;
+            const button = document.getElementById('soundToggle');
+            
+            if (isSoundEnabled) {
+                button.textContent = '🔊';
+                button.classList.remove('muted');
+                showMessage('🔊 Sonido activado', window.innerWidth / 2, 100);
+            } else {
+                button.textContent = '🔇';
+                button.classList.add('muted');
+                showMessage('🔇 Sonido desactivado', window.innerWidth / 2, 100);
+            }
+        }
+        
+        // Iniciar juego del pingüino
+        setTimeout(createPenguin, 3000);
+        
+        // Tetris en consola
+        console.log('%c🎮 TETRIS SECRETO 🎮', 'color: #0d6efd; font-size: 20px; font-weight: bold;');
+        console.log('%cPara jugar, escribe: startTetris()', 'color: #e0e0e0; font-size: 14px;');
+        console.log('%c🎯 TECLAS SECRETAS:', 'color: #ffc107; font-size: 16px; font-weight: bold;');
+        console.log('%cM: Juego de memoria | R: Cohete | C: Confeti | A: Arcoíris | D: Detective | S: Sonido', 'color: #e0e0e0; font-size: 12px;');
+        
+        // Función para iniciar Tetris en consola
+        window.startTetris = function() {
+            console.clear();
+            console.log('%c🎮 TETRIS INICIADO! 🎮', 'color: #28a745; font-size: 20px; font-weight: bold;');
+            console.log('%cControles:', 'color: #ffc107; font-size: 16px; font-weight: bold;');
+            console.log('%cA/D: Mover | S: Bajar | W: Rotar | Espacio: Caída rápida', 'color: #e0e0e0; font-size: 14px;');
+            console.log('%cP: Pausar | R: Reiniciar | Q: Salir', 'color: #e0e0e0; font-size: 14px;');
+            
+            // Inicializar el juego
+            initTetris();
+        };
+        
+        // Variables del Tetris
+        let tetrisBoard = [];
+        let tetrisPiece = null;
+        let tetrisScore = 0;
+        let tetrisLevel = 1;
+        let tetrisLines = 0;
+        let tetrisGameRunning = false;
+        let tetrisPaused = false;
+        let tetrisInterval = null;
+        
+        // Piezas del Tetris (Tetrominos)
+        const tetrominos = {
+            I: [
+                [1, 1, 1, 1]
+            ],
+            O: [
+                [1, 1],
+                [1, 1]
+            ],
+            T: [
+                [0, 1, 0],
+                [1, 1, 1]
+            ],
+            S: [
+                [0, 1, 1],
+                [1, 1, 0]
+            ],
+            Z: [
+                [1, 1, 0],
+                [0, 1, 1]
+            ],
+            J: [
+                [1, 0, 0],
+                [1, 1, 1]
+            ],
+            L: [
+                [0, 0, 1],
+                [1, 1, 1]
+            ]
+        };
+        
+        // Colores para las piezas
+        const pieceColors = {
+            I: '#00f0f0', O: '#f0f000', T: '#a000f0',
+            S: '#00f000', Z: '#f00000', J: '#0000f0', L: '#f0a000'
+        };
+        
+        function initTetris() {
+            // Crear tablero 20x10
+            tetrisBoard = Array(20).fill().map(() => Array(10).fill(0));
+            tetrisScore = 0;
+            tetrisLevel = 1;
+            tetrisLines = 0;
+            tetrisGameRunning = true;
+            tetrisPaused = false;
+            
+            // Crear primera pieza
+            spawnPiece();
+            
+            // Iniciar loop del juego
+            tetrisInterval = setInterval(tetrisGameLoop, 1000 - (tetrisLevel * 50));
+            
+            // Event listeners para controles
+            document.addEventListener('keydown', handleTetrisInput);
+            
+            // Mostrar tablero inicial
+            renderTetrisBoard();
+        }
+        
+        function spawnPiece() {
+            const pieces = Object.keys(tetrominos);
+            const randomPiece = pieces[Math.floor(Math.random() * pieces.length)];
+            
+            tetrisPiece = {
+                type: randomPiece,
+                shape: tetrominos[randomPiece],
+                x: 3,
+                y: 0,
+                rotation: 0
+            };
+            
+            // Verificar si la pieza puede colocarse
+            if (!canPlacePiece(tetrisPiece)) {
+                gameOver();
+            }
+        }
+        
+        function canPlacePiece(piece, newX = piece.x, newY = piece.y, newRotation = piece.rotation) {
+            const shape = getRotatedShape(piece.type, newRotation);
+            
+            for (let y = 0; y < shape.length; y++) {
+                for (let x = 0; x < shape[y].length; x++) {
+                    if (shape[y][x]) {
+                        const boardX = newX + x;
+                        const boardY = newY + y;
+                        
+                        if (boardX < 0 || boardX >= 10 || boardY >= 20) return false;
+                        if (boardY >= 0 && tetrisBoard[boardY][boardX]) return false;
+                    }
+                }
+            }
+            return true;
+        }
+        
+        function getRotatedShape(type, rotation) {
+            let shape = tetrominos[type];
+            
+            for (let i = 0; i < rotation; i++) {
+                shape = rotateShape(shape);
+            }
+            
+            return shape;
+        }
+        
+        function rotateShape(shape) {
+            const rows = shape.length;
+            const cols = shape[0].length;
+            const rotated = Array(cols).fill().map(() => Array(rows).fill(0));
+            
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    rotated[x][rows - 1 - y] = shape[y][x];
+                }
+            }
+            
+            return rotated;
+        }
+        
+        function handleTetrisInput(e) {
+            if (!tetrisGameRunning || tetrisPaused) return;
+            
+            switch(e.key.toLowerCase()) {
+                case 'a':
+                case 'arrowleft':
+                    movePiece(-1, 0);
+                    break;
+                case 'd':
+                case 'arrowright':
+                    movePiece(1, 0);
+                    break;
+                case 's':
+                case 'arrowdown':
+                    movePiece(0, 1);
+                    break;
+                case 'w':
+                case 'arrowup':
+                    rotatePiece();
+                    break;
+                case ' ':
+                    hardDrop();
+                    break;
+                case 'p':
+                    togglePause();
+                    break;
+                case 'r':
+                    restartTetris();
+                    break;
+                case 'q':
+                    quitTetris();
+                    break;
+            }
+            
+            e.preventDefault();
+        }
+        
+        function movePiece(dx, dy) {
+            if (canPlacePiece(tetrisPiece, tetrisPiece.x + dx, tetrisPiece.y + dy, tetrisPiece.rotation)) {
+                tetrisPiece.x += dx;
+                tetrisPiece.y += dy;
+                
+                // Renderizar en ambos lugares
+                if (document.getElementById('tetrisGame').style.display !== 'none') {
+                    renderVisualTetrisBoard();
+                } else {
+                    renderTetrisBoard();
+                }
+                return true;
+            }
+            return false;
+        }
+        
+        function rotatePiece() {
+            const newRotation = (tetrisPiece.rotation + 1) % 4;
+            if (canPlacePiece(tetrisPiece, tetrisPiece.x, tetrisPiece.y, newRotation)) {
+                tetrisPiece.rotation = newRotation;
+                
+                // Renderizar en ambos lugares
+                if (document.getElementById('tetrisGame').style.display !== 'none') {
+                    renderVisualTetrisBoard();
+                } else {
+                    renderTetrisBoard();
+                }
+            }
+        }
+        
+        function hardDrop() {
+            while (movePiece(0, 1)) {
+                tetrisScore += 2;
+            }
+        }
+        
+        function togglePause() {
+            tetrisPaused = !tetrisPaused;
+            if (tetrisPaused) {
+                clearInterval(tetrisInterval);
+                console.log('%c⏸️ JUEGO PAUSADO', 'color: #ffc107; font-size: 16px;');
+            } else {
+                tetrisInterval = setInterval(tetrisGameLoop, 1000 - (tetrisLevel * 50));
+                console.log('%c▶️ JUEGO REANUDADO', 'color: #28a745; font-size: 16px;');
+            }
+        }
+        
+        function tetrisGameLoop() {
+            if (!movePiece(0, 1)) {
+                placePiece();
+                clearLines();
+                spawnPiece();
+            }
+            
+            // Renderizar en ambos lugares
+            if (document.getElementById('tetrisGame').style.display !== 'none') {
+                renderVisualTetrisBoard();
+                updateTetrisUI();
+            } else {
+                renderTetrisBoard();
+            }
+        }
+        
+        function placePiece() {
+            const shape = getRotatedShape(tetrisPiece.type, tetrisPiece.rotation);
+            
+            for (let y = 0; y < shape.length; y++) {
+                for (let x = 0; x < shape[y].length; x++) {
+                    if (shape[y][x]) {
+                        const boardX = tetrisPiece.x + x;
+                        const boardY = tetrisPiece.y + y;
+                        if (boardY >= 0) {
+                            tetrisBoard[boardY][boardX] = tetrisPiece.type;
+                        }
+                    }
+                }
+            }
+        }
+        
+        function clearLines() {
+            let linesCleared = 0;
+            
+            for (let y = tetrisBoard.length - 1; y >= 0; y--) {
+                if (tetrisBoard[y].every(cell => cell !== 0)) {
+                    tetrisBoard.splice(y, 1);
+                    tetrisBoard.unshift(Array(10).fill(0));
+                    linesCleared++;
+                    y++; // Revisar la misma línea de nuevo
+                }
+            }
+            
+            if (linesCleared > 0) {
+                tetrisLines += linesCleared;
+                tetrisScore += linesCleared * 100 * tetrisLevel;
+                
+                // Subir nivel cada 10 líneas
+                const newLevel = Math.floor(tetrisLines / 10) + 1;
+                if (newLevel > tetrisLevel) {
+                    tetrisLevel = newLevel;
+                    // Aumentar velocidad
+                    clearInterval(tetrisInterval);
+                    tetrisInterval = setInterval(tetrisGameLoop, 1000 - (tetrisLevel * 50));
+                }
+                
+                console.log(`%c🎉 ¡${linesCleared} línea(s) eliminada(s)! Puntuación: ${tetrisScore}`, 'color: #28a745; font-size: 14px;');
+            }
+        }
+        
+        function renderTetrisBoard() {
+            console.clear();
+            
+            // Crear tablero temporal con la pieza actual
+            const tempBoard = tetrisBoard.map(row => [...row]);
+            if (tetrisPiece) {
+                const shape = getRotatedShape(tetrisPiece.type, tetrisPiece.rotation);
+                for (let y = 0; y < shape.length; y++) {
+                    for (let x = 0; x < shape[y].length; x++) {
+                        if (shape[y][x]) {
+                            const boardX = tetrisPiece.x + x;
+                            const boardY = tetrisPiece.y + y;
+                            if (boardY >= 0 && boardY < 20 && boardX >= 0 && boardX < 10) {
+                                tempBoard[boardY][boardX] = tetrisPiece.type;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Renderizar tablero
+            console.log('%c🎮 TETRIS - Nivel: ' + tetrisLevel + ' | Líneas: ' + tetrisLines + ' | Puntuación: ' + tetrisScore + ' 🎮', 'color: #0d6efd; font-size: 16px; font-weight: bold;');
+            console.log('%c┌─────────────────────────────┐', 'color: #e0e0e0; font-size: 14px;');
+            
+            for (let y = 0; y < 20; y++) {
+                let row = '│ ';
+                let hasPieces = false;
+                
+                for (let x = 0; x < 10; x++) {
+                    const cell = tempBoard[y][x];
+                    if (cell === 0) {
+                        row += '· ';
+                    } else {
+                        row += '██ ';
+                        hasPieces = true;
+                    }
+                }
+                row += '│';
+                
+                if (hasPieces) {
+                    // Renderizar fila con colores
+                    let coloredRow = '│ ';
+                    for (let x = 0; x < 10; x++) {
+                        const cell = tempBoard[y][x];
+                        if (cell === 0) {
+                            coloredRow += '· ';
+                        } else {
+                            coloredRow += '%c██%c ';
+                        }
+                    }
+                    coloredRow += '│';
+                    
+                    // Aplicar colores
+                    const args = ['color: #e0e0e0; font-size: 14px;'];
+                    for (let x = 0; x < 10; x++) {
+                        const cell = tempBoard[y][x];
+                        if (cell !== 0) {
+                            args.push('color: ' + pieceColors[cell] + '; font-size: 14px;');
+                            args.push('color: #e0e0e0; font-size: 14px;');
+                        }
+                    }
+                    
+                    console.log(coloredRow, ...args);
+                } else {
+                    console.log(row, 'color: #e0e0e0; font-size: 14px;');
+                }
+            }
+            
+            console.log('%c└─────────────────────────────┘', 'color: #e0e0e0; font-size: 14px;');
+            console.log('%cPieza actual: ' + tetrisPiece.type, 'color: #ffc107; font-size: 14px;');
+            console.log('%cControles: A/D (mover) | S (bajar) | W (rotar) | Espacio (caída) | P (pausar) | R (reiniciar) | Q (salir)', 'color: #e0e0e0; font-size: 12px;');
+        }
+        
+        function gameOver() {
+            tetrisGameRunning = false;
+            clearInterval(tetrisInterval);
+            console.log('%c💀 GAME OVER 💀', 'color: #dc3545; font-size: 20px; font-weight: bold;');
+            console.log('%cPuntuación final: ' + tetrisScore, 'color: #ffc107; font-size: 16px;');
+            console.log('%cLíneas completadas: ' + tetrisLines, 'color: #ffc107; font-size: 16px;');
+            console.log('%cNivel alcanzado: ' + tetrisLevel, 'color: #ffc107; font-size: 16px;');
+            console.log('%cEscribe restartTetris() para jugar de nuevo', 'color: #28a745; font-size: 14px;');
+            
+            document.removeEventListener('keydown', handleTetrisInput);
+        }
+        
+        function restartTetris() {
+            if (tetrisInterval) clearInterval(tetrisInterval);
+            document.removeEventListener('keydown', handleTetrisInput);
+            initTetris();
+        }
+        
+        function quitTetris() {
+            tetrisGameRunning = false;
+            clearInterval(tetrisInterval);
+            document.removeEventListener('keydown', handleTetrisInput);
+            console.log('%c👋 ¡Hasta luego!', 'color: #6c757d; font-size: 16px;');
+        }
+        
+        // Funciones globales para la consola
+        window.restartTetris = restartTetris;
+        window.quitTetris = quitTetris;
+        
+        setInterval(updateProgress, 30000);
+        updateProgress();
+    </script>
+</body>
+</html>
